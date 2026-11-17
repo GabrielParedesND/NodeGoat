@@ -1,8 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Excepciones documentadas (suppression rules) para OWASP Dependency-Check.
-  Toda excepcion debe incluir: justificacion, responsable y fecha de expiracion (until).
-  Sin excepciones activas en la linea base.
+  Politica: toda excepcion incluye justificacion, control compensatorio,
+  responsable y fecha de expiracion (atributo "until"). Al expirar, la
+  excepcion deja de aplicar y el Quality Gate vuelve a bloquear el build.
+
+  Remediaciones aplicadas ANTES de recurrir a excepciones (commit "fix"):
+    - marked 0.3.5 -> ^4.3.0, needle 2.2.4 -> ^3.5.0, underscore -> ^1.13.8,
+      express -> ^4.22.3, body-parser -> ^1.20.4, express-session -> ^1.19.0,
+      helmet 2.x -> ^8.1.0
+    - forever eliminado (no se usa en el codigo; arrastraba 20+ CVEs criticos)
+    - overrides: semver ^5.7.2, minimist ^1.2.8
+  Resultado npm audit (produccion): 52 -> 7 vulnerabilidades.
 -->
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+  <!-- SCA-EX-01: Driver MongoDB 2.x (mongodb, mongodb-core, bson) -->
+  <suppress until="2027-03-31Z">
+    <notes><![CDATA[
+      Riesgo aceptado temporalmente. La correccion requiere migrar el driver
+      mongodb 2.x -> 6.x/7.x (cambio mayor de API: callbacks -> promesas) en
+      todos los DAO de app/data/*. Planificado como historia tecnica.
+      Control compensatorio: MongoDB solo escucha en red interna/contenedor,
+      sin exposicion a Internet; la app no deserializa BSON de fuentes externas.
+      Responsable: Estudiante S07. Expira: 2027-03-31.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:npm/(mongodb|mongodb-core|bson)@.*$</packageUrl>
+    <vulnerabilityName regex="true">.*</vulnerabilityName>
+  </suppress>
+
+  <!-- SCA-EX-02: Motor de plantillas swig (abandonado) y su dependencia uglify-js -->
+  <suppress until="2027-03-31Z">
+    <notes><![CDATA[
+      swig esta abandonado (sin version corregida). La correccion es migrar las
+      vistas app/views/*.html a otro motor (nunjucks, API compatible).
+      Control compensatorio: las plantillas son estaticas y versionadas; el
+      usuario no controla nombres de plantilla (mitiga lectura arbitraria de
+      archivos); uglify-js solo se usa para compilar plantillas internas.
+      Responsable: Estudiante S07. Expira: 2027-03-31.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:npm/(swig|uglify-js|optimist)@.*$</packageUrl>
+    <vulnerabilityName regex="true">.*</vulnerabilityName>
+  </suppress>
+
 </suppressions>

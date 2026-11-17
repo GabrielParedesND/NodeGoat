@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------
+# Rutas excluidas del analisis SAST (Semgrep)
+# Se conservan las exclusiones por defecto de Semgrep y se agregan
+# EXCEPCIONES DOCUMENTADAS (Tarea S07 - Quality Gate).
+# ---------------------------------------------------------------
+
+# Exclusiones por defecto de Semgrep
+:include .gitignore
+node_modules/
+build/
+dist/
+vendor/
+.env/
+.venv/
+.tox/
+*.min.js
+.npm/
+.yarn/
+test/
+tests/
+.semgrep
+.semgrep_logs/
+
+# EXCEPCION SAST-EX-01 - artifacts/cert/server.key
+#   Regla: generic.secrets.security.detected-private-key (ERROR)
+#   Justificacion: certificado autofirmado de laboratorio, usado solo para
+#   levantar HTTPS local de NodeGoat. No protege ningun sistema productivo.
+#   Mitigacion: en produccion la llave se inyecta como secreto (no se versiona).
+#   Responsable: Estudiante S07 | Revisar: 2027-03-31
+artifacts/cert/
+
+# EXCEPCION SAST-EX-02 - artifacts/db-reset.js
+#   Regla: generic.secrets.security.detected-bcrypt-hash (ERROR)
+#   Justificacion: script de semilla para la BD de pruebas; los hashes bcrypt
+#   corresponden a usuarios ficticios de demostracion (admin/user1/user2).
+#   Mitigacion: el script no se despliega; credenciales reales se crean fuera del repo.
+#   Responsable: Estudiante S07 | Revisar: 2027-03-31
+artifacts/db-reset.js
